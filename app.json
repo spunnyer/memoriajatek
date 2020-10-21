@@ -1,26 +1,28 @@
 {
-  "expo": {
-    "name": "react-native-sandbox",
-    "slug": "react-native-sandbox",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
-  }
+	"expo": {
+		"name": "Memóriajáték",
+		"slug": "react-native-sandbox",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"privacy": "unlisted",
+		"icon": "./assets/icon.png",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"updates": {
+			"fallbackToCacheTimeout": 0
+		},
+		"assetBundlePatterns": [
+			"**/*"
+		],
+		"android": {
+			"package": "hu.spunnyer.memoriajatek",
+			"versionCode": 1
+		},
+		"web": {
+			"favicon": "./assets/favicon.png"
+		}
+	}
 }
