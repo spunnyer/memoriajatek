@@ -1,21 +1,20 @@
+/*
+
+
+- Szintek teljesítésével gyorsuló idő
+- Nehézségi szint kiválasztása
+
+*/
+
+// TODO: TISZTA KÓD - RETEK RONDÁN NÉZ KI DE NINCS IDŐM JAVÍTANI ÁÁÁÁH
+
 import React, { useState, setState, useEffect, Component } from 'react'
-import { View, Text, Button, Modal, StyleSheet } from 'react-native'
+import { View, Text, Button, StyleSheet } from 'react-native'
 
 import InGame from './src/Components/InGame'
-import Countdown from './src/Components/Countdown'
 import Difficulties from './src/Components/Difficulties'
 
-
 class App extends Component {
-
-
-	generateNest = () => {
-		for (let y = 0; y < size; y++) {
-			for (let x = 0; x < size; x++) {
-
-			}
-		}
-	}
 
 
 	state = {
@@ -23,8 +22,9 @@ class App extends Component {
 		selectedSize: 0,
 		InGame: false,
 		startingGame: false,
-
+		board: []
 	}
+
 	
 	startGame = () => {
 		this.setState((state) => {
@@ -74,11 +74,34 @@ class App extends Component {
 	}
 
 
+
+
+
+
+
+
+
+
+	displayBoard = () => {
+		let render = []
+
+		this.state.board.map((tile, index) => {
+			render.push(
+				<Text>{index}</Text>
+			)
+		})
+
+		return render
+	}
+
+
+
+
+
 	render() {
 		
 		return (
 			<View style={styles.container}>
-
 
 				{!(this.state.InGame || this.state.startingGame) ?
 				<View>
@@ -91,19 +114,6 @@ class App extends Component {
 				</View> : null}
 				
 				{this.state.startingGame ? <Difficulties callback={this.setDifficulty}/> : null}
-
-				{/* <View style={{
-					color: "white",
-					position: "absolute",
-					padding: 12,
-					top: 0,
-					left: 0,
-					backgroundColor: "darkgray"
-				}}>
-					<Text>{this.state.startingGame ? "játék indítás alatt..." : "játék nincs elkezdve"}</Text>
-					<Text>Játékban: {this.state.inGame ? "játékban" : "várakozóban"}</Text>
-					<Text>Kiválasztott méret: {this.state.selectedSize}</Text>
-				</View> */}
 
 				{this.state.InGame ? <InGame size={this.state.selectedSize}/> : null}
 

@@ -1,84 +1,188 @@
 import React, { Component } from 'react'
-import { View, Text, Button, TouchableOpacity, Alert, StyleSheet } from 'react-native'
-
-class InGame extends Component {
-
-	constructor(props) {
-		super(props)
-		this.size = props.size
-
-		this.createNet()
-		this.initGame()
-	}
-
-	state = {
-		steps: 3,
-		currentlyDisplaying: 0,
-		memorizeTime: 1.5,
-
-		memorizeTiles: [],
-
-		score: 0,
-		currentStep: 0
-	}
+import { View, Text, FlatList, Button, SafeAreaView, TouchableOpacity, StyleSheet, Alert, Dimensions} from 'react-native'
 
 
-	tilePress = (ID) => {
-		// alert(`Megnyomott csempe! (Azonosító: ${ID})`)
-
-		if (this.state.memorizeTiles[this.state.currentStep] == ID) {
-			// alert("SIKER!")
-			this.setState(state => {
-				return {
-					currentStep: (this.state.currentStep + 1),
-					score: (this.state.score + 1)
-				}
-			})
-		} else {
-			this.gameOver()
-		}
-	}
-
-
-	createNet = () => {
-		this.net = []
-
-		for (let y = 0; y < this.size; y++) {
-			var row = []
-
-			for (let x = 0; x < this.size; x++) {
-				const ID = (y * this.size) + x
-
-				row.push(
-					<TouchableOpacity style={{
-						flex: 1,
-						backgroundColor: "darkgray",
-						margin: 6
-					}} onPress={() => this.tilePress(ID)}><Text>{ID}</Text></TouchableOpacity>
-				)
-			}
-
-			this.net.push(
-				<View style={{
-					flex: 1,
-					flexDirection: "column"
-				}}>
-					{row}
-				</View>
-			)
-		}
-
-	}
-
+class App extends Component {
 
 
 	generateRandom = () => {
-		const max = this.size * this.size
+		const max = this.state.size * this.state.size
 		const selected = Math.floor(Math.random() * max);
 
-		// alert(`Kiválasztott csempe: ${selected} (Maximum kiválaszható: ${max})`)
+		console.info(`A véletlenszerűen generált szám: ${selected})`)
 		return selected
 	}
+
+
+
+	initBoard = () => {
+		let clone = []
+		for (let i = 0; i < (this.state.size * this.state.size); i++) {
+			clone.push({
+				isHighlighted: false,
+			})
+		}
+
+		this.setState({
+			board: clone
+		})
+	}
+
+	componentDidMount() {
+		this.launchGame()
+	}
+
+
+
+
+	nextLevel = () => {
+
+		// init
+		this.setState({
+			memorizeTime: (this.state.memorizeTime * 0.8),
+			currentStep: 0
+		})
+
+		// clear board
+		this.initBoard()
+
+
+		// get randoms
+		let rands = []
+		for (let i = 0; i < this.state.steps; i++) {
+			rands.push(this.generateRandom())
+		}
+
+		// var numbers = rands
+
+		this.setState({
+			memorizeTiles: rands
+		})
+
+		// console.log(this.state.memorize)
+
+
+
+		// display thingy-things
+		const countdown = setInterval(() => {
+		
+			this.initBoard()
+
+			if (this.state.currentlyAt < rands.length) {
+
+				console.info(`A jelenleg kiválasztott azonosító: ${rands[this.state.currentlyAt]}`)
+
+				this.highlightTile(rands[this.state.currentlyAt])
+
+				this.setState(state => {
+					return {
+						currentlyAt: (this.state.currentlyAt + 1)
+					}
+				})
+
+				
+
+			} else {
+				this.setState({
+					currentlyAt: 0
+				})
+
+				clearInterval(countdown)
+			}
+	
+		}, this.state.memorizeTime * 1000)
+			
+	}
+
+
+
+
+	launchGame = () => {
+
+		// pontok nullázása
+		this.setState({
+			score: 0,
+			memorizeTime: 1
+		})
+
+		this.nextLevel()
+
+	}
+
+
+
+	restartGame() {
+		this.launchGame()
+	}
+
+
+
+	
+
+	constructor(props) {
+		super(props)
+
+		const steps = 3
+		const size = props.size
+
+
+		console.info("Játék elindítása...")
+		
+		// state kiírása
+		this.state = {
+			board: [],
+			size: size,
+
+			memorizeTime: 1,
+			memorize: [],
+			currentlyAt: 0,
+			steps: steps,
+			score: 0,
+			currentStep: 0
+		}
+
+
+
+		// this.launchGame()
+
+
+	}
+
+	
+
+
+
+
+	renderItem = (data) => {
+		return (
+			<TouchableOpacity onPress={() => this.tilePress(data.index)} style={[styles.tile, (data.item.isHighlighted && styles.highlighted)]}>
+				<Text></Text>
+			</TouchableOpacity>
+		)
+	}
+
+
+
+
+
+
+	highlightTile = (tileId) => {
+		console.info(`A ${tileId} kijelölése...`)
+
+		let clone = this.state.board
+		clone[tileId].isHighlighted = true
+
+		this.setState({
+			board: clone
+		})
+	}
+
+
+
+
+
+
+
 
 
 	gameOver = () => {
@@ -87,6 +191,7 @@ class InGame extends Component {
 			`Az elért eredményed: ${this.state.score}`, [
 				{
 					text: "Újrapróbálkozás",
+					onPress: () => this.launchGame(),
 				}, {
 					text: "Kilépés"
 				}
@@ -99,57 +204,45 @@ class InGame extends Component {
 
 
 
+	tilePress = (tileId) => {
+		console.info(`Megnyomott csempe! (Azonosító: ${tileId})`)
+		console.info(this.state.memorizeTiles)
 
-	initGame = () => {
+		if (this.state.memorizeTiles[this.state.currentStep] == tileId) {
 
-		let numbers = []
+			this.setState({
+				currentStep: (this.state.currentStep + 1),
+				score: (this.state.score + 1)
+			})
 
-		for (let i = 0; i < this.state.steps; i++) {
-			numbers.push(this.generateRandom())
-		}
-
-		// alert(numbers)
-		this.state.memorizeTiles = numbers
-
-		
-		const countdown = setInterval(() => {
-		
-			if (this.state.currentlyDisplaying < numbers.length) {
-
-				alert(`A jelnleg kiválasztott azonosító: ${numbers[this.state.currentlyDisplaying]}`)
-
-				this.setState(state => {
-					return {
-						currentlyDisplaying: (this.state.currentlyDisplaying + 1)
-					}
-				})
-
-			} else {
-				this.state.currentlyDisplaying = 0
-				clearInterval(countdown)
+			console.info(`Jelenlegi lépések: ${this.state.currentStep}`)
+			if (this.state.currentStep == (this.state.steps - 1)) {
+				console.info("Pálya kijátszva! Újraázás...")
+				this.nextLevel()
 			}
-	
-		}, this.state.memorizeTime * 1000)
 
+		} else {
+			console.info("A játéknak vége!")
+			this.gameOver()
+		}
 	}
 
 
 
+
+
+
+
+
 	render() {
-
-		
-
 		return (
 			<View style={styles.container}>
-				<View style={styles.playArea}>
-					<View style={{
-					width: "100%",
-					height: "100%",
-					flexDirection: "row",
-					alignSelf:'stretch'
-				}}>
-					{this.net}
-					</View>
+				<FlatList style={{
+					flex: 1,
+					padding: 4,
+				}} contentContainerStyle = {{ justifyContent: "center", alignItems: "strech", flex: 1}} columnWrapperStyle={{flexGrow: 1}} numColumns={this.state.size} data={this.state.board} extraData={this.state} renderItem={item => this.renderItem(item)} keyExtractor={(item, index) => `${index}`}/>
+				<View style={styles.footer}>
+					<Text>Pontszám: {this.state.score}</Text>
 				</View>
 			</View>
 		)
@@ -157,33 +250,42 @@ class InGame extends Component {
 
 }
 
+export default App
 
 
 
 const styles = StyleSheet.create({
 
 	container: {
-		position: 'absolute',
+		flex: 1,
+		position: "absolute",
 		top: 0,
-		left: 0,
-		right: 0,
 		bottom: 0,
-		justifyContent: 'center',
-		alignItems: 'center',
-		width: "100%",
-		height: "100%"
+		right: 0,
+		left: 0,
+		backgroundColor: "white",
 	},
 
-	playArea: {
-		backgroundColor: "white",
+	tile: {
+		margin: 4,
+		paddingVertical: 26,
 		flex: 1,
-		width: "100%",
-		height: "100%",
+		backgroundColor: "darkgray"
+	},
+
+	board: {
+		flex: 1,
+		height: 280,
 		padding: 6
+	},
+
+	footer: {
+		backgroundColor: "gray",
+		padding: 8,
+		textAlign: "center",
+	},
+
+	highlighted: {
+		backgroundColor: "gray"
 	}
 })
-
-
-
-
-export default InGame;
